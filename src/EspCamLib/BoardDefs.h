@@ -24,7 +24,7 @@ namespace EspCam
         int flash;
 
 // AI Thinker ESP32-CAM
-#define PINOUT_AI_THINKER BoardDef::AIThinker
+#define PINOUT_AI_THINKER EspCam::BoardDef::AIThinker
         static void AIThinker(BoardDef *def)
         {
             def->pwdn = 32;
