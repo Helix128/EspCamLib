@@ -8,7 +8,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EspCamLib Console</title>
+    <title>EspCamLib WebServer</title>
     <style>
         :root {
             --bg: #000000;
