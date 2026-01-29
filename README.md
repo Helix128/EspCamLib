@@ -3,6 +3,10 @@
 ## Features
 TODO
 
+## Planned features
+- Video recording (SD SPI/MMC)
+- ML integration
+
 ## Supported boards
 - AI-Thinker ESP32-CAM
 - TODO: add more board pinouts, if your board model isn't here its easy to add more, and the library should be compatible with any camera that works with esp_camera.h
