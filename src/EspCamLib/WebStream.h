@@ -1,6 +1,5 @@
 #ifndef ESPCAMLIB_WEBSTREAM_H
 #define ESPCAMLIB_WEBSTREAM_H
-
 #include <Arduino.h>
 #include <WiFi.h>
 #include "esp_camera.h"
@@ -28,18 +27,18 @@ namespace EspCam
             httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
 
             while (true) {
-                CaptureData pic = instance->m_camera->capture();
-                if (!pic.success()) {
+                camera_fb_t* pic = instance->m_camera->getFrame();
+                if (!pic) {
                     return ESP_FAIL;
                 }
 
-                String partHeader = "--frame\r\nContent-Type: image/jpeg\r\nContent-Length: " + String(pic.getLength()) + "\r\n\r\n";
+                String partHeader = "--frame\r\nContent-Type: image/jpeg\r\nContent-Length: " + String(pic->len) + "\r\n\r\n";
                 httpd_resp_send_chunk(req, partHeader.c_str(), partHeader.length());
 
-                httpd_resp_send_chunk(req, pic.getBuffer(), pic.getLength());
+                httpd_resp_send_chunk(req, (const char *)pic->buf, pic->len);
                 httpd_resp_send_chunk(req, "\r\n", 2);
 
-                pic.dispose();
+                instance->m_camera->releaseFrame(pic);
             }
 
             return ESP_OK;
@@ -78,5 +77,4 @@ namespace EspCam
         }
     };
 };
-
 #endif

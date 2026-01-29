@@ -1,6 +1,5 @@
-#ifndef ESPCAMLIB_PINOUT
-#define ESPCAMLIB_PINOUT
-
+#ifndef ESPCAMLIB_BOARDDEFS_H
+#define ESPCAMLIB_BOARDDEFS_H
 namespace EspCam
 {
     struct BoardDef

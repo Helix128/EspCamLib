@@ -1,6 +1,5 @@
 #ifndef ESPCAMLIB_WEBSERVER_H
 #define ESPCAMLIB_WEBSERVER_H
-
 #include <Arduino.h>
 #include <WiFi.h>
 #include "esp_camera.h"
@@ -30,11 +29,11 @@ namespace EspCam
             WebServer* instance = static_cast<WebServer*>(req->user_ctx);
             if (!instance) return ESP_FAIL;
 
-            float kbps = (instance->m_bytes_per_sec * 8.0) / 1024.0;
+            float kbps = (instance->m_bytes_per_sec * 8.0f) / 1024.0f;
             instance->m_bytes_per_sec = 0; 
 
             String json = "{";
-            json += "\"heap\":" + String(ESP.getFreeHeap()) + ",";
+            json += "\"heap\":" + String(ESP.getFreeHeap()+ESP.getFreePsram()) + ",";
             json += "\"rssi\":" + String(WiFi.RSSI()) + ",";
             json += "\"kbps\":" + String(kbps, 1) + ",";
             json += "\"ip\":\"" + WiFi.localIP().toString() + "\""; 
@@ -100,16 +99,16 @@ namespace EspCam
             httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
 
             while (true) {
-                CaptureData pic = instance->m_camera->capture();
-                if (!pic.success()) {
+                camera_fb_t *pic = instance->m_camera->getFrame();
+                if (!pic) {
                     return ESP_FAIL;
                 }
 
-                String partHeader = "--frame\r\nContent-Type: image/jpeg\r\nContent-Length: " + String(pic.getLength()) + "\r\n\r\n";
+                String partHeader = "--frame\r\nContent-Type: image/jpeg\r\nContent-Length: " + String(pic->len) + "\r\n\r\n";
                 esp_err_t res = httpd_resp_send_chunk(req, partHeader.c_str(), partHeader.length());
                 
                 if (res == ESP_OK) {
-                    res = httpd_resp_send_chunk(req, pic.getBuffer(), pic.getLength());
+                    res = httpd_resp_send_chunk(req, (const char *)pic->buf, pic->len);
                 }
                 
                 if (res == ESP_OK) {
@@ -117,10 +116,10 @@ namespace EspCam
                 }
 
                 if (res == ESP_OK) {
-                    instance->m_bytes_per_sec += pic.getLength();
+                    instance->m_bytes_per_sec += pic->len;
                 }
 
-                pic.dispose();
+                instance->m_camera->releaseFrame(pic);
                 
                 if (res != ESP_OK) {
                     break;

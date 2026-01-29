@@ -1,6 +1,5 @@
-#ifndef ESPCAMLIB_CAMERA
-#define ESPCAMLIB_CAMERA
-
+#ifndef ESPCAMLIB_CAMERA_H
+#define ESPCAMLIB_CAMERA_H
 #include <Arduino.h>
 #include "esp_camera.h"
 #include "./BoardDefs.h"
@@ -9,58 +8,6 @@
 
 namespace EspCam
 {
-    class CaptureData
-    {
-    private:
-        bool m_ok;
-        camera_fb_t* m_fbPtr;
-        char* m_buffer;
-        int m_length;
-        int m_width;
-        int m_height;
-        pixformat_t m_format;
-
-    public:
-        camera_fb_t *getRawPtr()
-        {
-            return m_fbPtr;
-        }
-        char *getBuffer()
-        {
-            return m_buffer;
-        }
-        int getLength()
-        {
-            return m_length;
-        }
-        int getWidth()
-        {
-            return m_width;
-        }
-        int getHeight()
-        {
-            return m_height;
-        }
-        pixformat_t getFormat()
-        {
-            return m_format;
-        }
-
-    public:
-        CaptureData(camera_fb_t *fb, char *buf, int len, int w, int h, pixformat_t fmt, bool ok)
-            : m_fbPtr(fb), m_buffer(buf), m_length(len), m_width(w), m_height(h), m_format(fmt), m_ok(ok) {}
-
-        bool success()
-        {
-            return m_ok;
-        }
-
-        void dispose()
-        {
-            esp_camera_fb_return(m_fbPtr);
-        }
-    };
-
     class Camera
     {
 
@@ -155,7 +102,7 @@ namespace EspCam
             }
         }
 
-        void setJPEGQuality(int quality)
+        void setJpegQuality(int quality)
         {
             config.jpeg_quality = quality;
             sensor_t *s = esp_camera_sensor_get();
@@ -216,17 +163,15 @@ namespace EspCam
             }
         }
 
-        CaptureData capture()
+        camera_fb_t *getFrame()
         {
-            camera_fb_t *fb = esp_camera_fb_get();
-            if (!fb)
-            {
-                return {nullptr, nullptr, 0, 0, 0, PIXFORMAT_JPEG, false};
-            }
-            else
-            {
-                return {fb, (char *)fb->buf, (int)fb->len, (int)fb->width, (int)fb->height, fb->format, true};
-            }
+            return esp_camera_fb_get();
+        }
+
+        void releaseFrame(camera_fb_t *fb)
+        {   
+            if(!fb) return;
+            esp_camera_fb_return(fb);
         }
 
         pixformat_t getPixelFormat()
