@@ -83,7 +83,7 @@ namespace EspCam
             setBrownout(false);
         }
 
-        Camera(BoardDef::BoardDefFunc boardDefFunc) : Camera()
+        Camera(void (*boardDefFunc)(BoardDef *)) : Camera()
         {
             setPinout(boardDefFunc);
         }
