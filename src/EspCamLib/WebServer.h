@@ -71,6 +71,12 @@ namespace EspCam
                             bool isMirrored = instance->m_camera.getHFlip();
                             instance->m_camera.setHFlip(!isMirrored);
                         }
+                        else if (cmd == "framesize") {
+                            instance->m_camera.setFrameSize((framesize_t)value);
+                        }
+                        else if (cmd == "quality") {
+                            instance->m_camera.setJPEGQuality(value);
+                        }
                         else if (cmd == "reboot") {
                             ESP.restart();
                         }
@@ -189,5 +195,4 @@ namespace EspCam
         }
     };
 };
-
 #endif

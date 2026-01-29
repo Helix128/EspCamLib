@@ -71,7 +71,6 @@ namespace EspCam
     public:
         Camera()
         {
-            // default config
             config.xclk_freq_hz = 20000000;
             config.ledc_timer = LEDC_TIMER_0;
             config.ledc_channel = LEDC_CHANNEL_0;
@@ -88,7 +87,7 @@ namespace EspCam
         {
             if (config.pin_pwdn != -1)
             {
-                digitalWrite(config.pin_pwdn, LOW); // power up the camera
+                digitalWrite(config.pin_pwdn, LOW);
                 delay(10);
             }
             esp_err_t err = esp_camera_init(&config);
@@ -135,16 +134,28 @@ namespace EspCam
         void setFrameSize(framesize_t frameSize)
         {
             config.frame_size = frameSize;
+            sensor_t *s = esp_camera_sensor_get();
+            if (s) {
+                s->set_framesize(s, frameSize);
+            }
         }
 
         void setPixelFormat(pixformat_t format)
         {
             config.pixel_format = format;
+            sensor_t *s = esp_camera_sensor_get();
+            if (s) {
+                s->set_pixformat(s, format);
+            }
         }
 
         void setJPEGQuality(int quality)
         {
             config.jpeg_quality = quality;
+            sensor_t *s = esp_camera_sensor_get();
+            if (s) {
+                s->set_quality(s, quality);
+            }
         }
 
         void setFramebufferCount(size_t count)
@@ -198,7 +209,6 @@ namespace EspCam
                 s->set_hmirror(s, hmirror ? 1 : 0);
             }
         }
-
 
         CaptureData capture()
         {

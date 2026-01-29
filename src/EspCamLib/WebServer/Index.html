@@ -133,6 +133,15 @@
             border-radius: 50%; cursor: pointer; border: 2px solid #000;
         }
 
+        select {
+            width: 100%;
+            background: #222;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            padding: 5px;
+            font-family: inherit;
+        }
+
         button {
             background: #222; border: 1px solid #444; color: #fff;
             width: 100%; padding: 10px; cursor: pointer;
@@ -187,10 +196,38 @@
         </div>
 
         <div class="panel-box">
-            <div class="panel-header">Camera Controls</div>
+            <div class="panel-header">Image Settings</div>
             
             <div class="control-group">
-                <span class="control-label">Flash Intensity (0-255)</span>
+                <span class="control-label">Resolution</span>
+                <select id="res-select" onchange="updateResolution(this.value)">
+                    <option value="0">96x96</option>
+                    <option value="1">QQVGA (160x120)</option>
+                    <option value="3">HQVGA (240x176)</option>
+                    <option value="5">QVGA (320x240)</option>
+                    <option value="6">CIF (400x296)</option>
+                    <option value="7">HVGA (480x320)</option>
+                    <option value="8" selected>VGA (640x480)</option>
+                    <option value="9">SVGA (800x600)</option>
+                    <option value="10">XGA (1024x768)</option>
+                    <option value="11">HD (1280x720)</option>
+                    <option value="12">SXGA (1280x1024)</option>
+                    <option value="13">UXGA (1600x1200)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <span class="control-label">JPEG Quality (Lower is better)</span>
+                <input type="range" min="10" max="63" value="12" id="quality-slider" oninput="updateQualityDebounced(this.value)">
+                <div style="text-align: right; color: #888; font-size: 10px;" id="quality-val-disp">12</div>
+            </div>
+        </div>
+
+        <div class="panel-box">
+            <div class="panel-header">Hardware Controls</div>
+            
+            <div class="control-group">
+                <span class="control-label">Flash Intensity</span>
                 <input type="range" min="0" max="255" value="0" id="flash-slider" oninput="updateFlashDebounced(this.value)">
             </div>
 
@@ -221,7 +258,8 @@
         bitrate: document.getElementById('val-bitrate'),
         osdRes: document.getElementById('osd-res'),
         osdFps: document.getElementById('osd-fps'),
-        logs: document.getElementById('log-panel')
+        logs: document.getElementById('log-panel'),
+        qualDisp: document.getElementById('quality-val-disp')
     };
 
     let baseUrl = window.location.hostname;
@@ -233,6 +271,7 @@
     let lastFrameTime = Date.now();
     let currentFps = 0;
     let flashTimeout = null;
+    let qualityTimeout = null;
 
     ui.stream.onload = () => {
         frameCount++;
@@ -264,16 +303,30 @@
     function updateFlashDebounced(val) {
         if (flashTimeout) clearTimeout(flashTimeout);
         flashTimeout = setTimeout(() => {
-            updateFlash(val);
+            updateControl('flash', val);
         }, 150);
     }
 
-    async function updateFlash(val) {
+    function updateQualityDebounced(val) {
+        ui.qualDisp.innerText = val;
+        if (qualityTimeout) clearTimeout(qualityTimeout);
+        qualityTimeout = setTimeout(() => {
+            updateControl('quality', val);
+        }, 300);
+    }
+
+    function updateResolution(val) {
+        updateControl('framesize', val);
+    }
+
+    async function updateControl(variable, val) {
         try {
             val = parseInt(val);
-            await fetch(`http://${baseUrl}:${CONFIG.apiPort}/control?var=flash&val=${val}`);
+            await fetch(`http://${baseUrl}:${CONFIG.apiPort}/control?var=${variable}&val=${val}`);
+            addLog(`Set ${variable} to ${val}`, 'info');
         } catch (e) {
             console.error(e);
+            addLog(`Failed to set ${variable}`, 'err');
         }
     }
 
