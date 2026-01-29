@@ -83,6 +83,11 @@ namespace EspCam
             setBrownout(false);
         }
 
+        Camera(BoardDef::BoardDefFunc boardDefFunc) : Camera()
+        {
+            setPinout(boardDefFunc);
+        }
+
         bool begin()
         {
             if (config.pin_pwdn != -1)

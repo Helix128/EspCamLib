@@ -1,5 +1,5 @@
-#ifndef BASICWEBSERVER_H
-#define BASICWEBSERVER_H
+#ifndef ESPCAMLIB_WEBSTREAM_H
+#define ESPCAMLIB_WEBSTREAM_H
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -8,6 +8,7 @@
 
 #include "Camera.h"
 
+// stream only HTTP server
 namespace EspCam
 {
     class WebStream

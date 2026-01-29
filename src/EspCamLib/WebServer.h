@@ -1,5 +1,5 @@
-#ifndef WEBSERVER_H
-#define WEBSERVER_H
+#ifndef ESPCAMLIB_WEBSERVER_H
+#define ESPCAMLIB_WEBSERVER_H
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "WebServer/Index.h"
 
+// http server with user interactivity and a separate stream endpoint
 namespace EspCam
 {   
     class WebServer
