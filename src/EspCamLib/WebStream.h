@@ -14,7 +14,8 @@ namespace EspCam
     class WebStream
     {
     private:
-        Camera m_camera;
+        int m_port;
+        Camera* m_camera;
         httpd_handle_t server = NULL;
 
         static esp_err_t streamHandler(httpd_req_t *req) {
@@ -27,7 +28,7 @@ namespace EspCam
             httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
 
             while (true) {
-                CaptureData pic = instance->m_camera.capture();
+                CaptureData pic = instance->m_camera->capture();
                 if (!pic.success()) {
                     return ESP_FAIL;
                 }
@@ -44,17 +45,18 @@ namespace EspCam
             return ESP_OK;
         }
     public:
-        WebStream(Camera camera) : m_camera(camera) { }
+        WebStream(Camera* camera, int port = 80) : m_camera(camera), m_port(port) { }
 
         bool begin(int port = 80) {
-            pixformat_t format = m_camera.getPixelFormat();
+            m_port = port;
+            pixformat_t format = m_camera->getPixelFormat();
             if (format != PIXFORMAT_JPEG) {
                 Serial.println("BasicWebServer ERROR: Camera pixel format must be set to JPEG.");
                 return false;
             }
 
             httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-            config.server_port = port;
+            config.server_port = m_port;
 
             httpd_uri_t streamUri = {
                 .uri       = "/",

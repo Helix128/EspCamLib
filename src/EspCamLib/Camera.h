@@ -1,6 +1,7 @@
 #ifndef ESPCAMLIB_CAMERA
 #define ESPCAMLIB_CAMERA
 
+#include <Arduino.h>
 #include "esp_camera.h"
 #include "./BoardDefs.h"
 #include "soc/soc.h"
@@ -12,8 +13,8 @@ namespace EspCam
     {
     private:
         bool m_ok;
-        camera_fb_t *m_fbPtr;
-        char *m_buffer;
+        camera_fb_t* m_fbPtr;
+        char* m_buffer;
         int m_length;
         int m_width;
         int m_height;

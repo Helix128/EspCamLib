@@ -15,7 +15,8 @@ namespace EspCam
     class WebServer
     {
     private:
-        Camera m_camera;
+        int m_port;
+        Camera* m_camera;
         httpd_handle_t camera_httpd = NULL;
         httpd_handle_t stream_httpd = NULL;
         volatile size_t m_bytes_per_sec = 0;
@@ -62,21 +63,21 @@ namespace EspCam
                         int value = atoi(val);
                     
                         if (cmd == "flash") {
-                            instance->m_camera.setFlash(value);
+                            instance->m_camera->setFlash(value);
                         }
                         else if (cmd == "vflip") {
-                            bool isFlipped = instance->m_camera.getVFlip();
-                            instance->m_camera.setVFlip(!isFlipped);
+                            bool isFlipped = instance->m_camera->getVFlip();
+                            instance->m_camera->setVFlip(!isFlipped);
                         }
                         else if (cmd == "hmirror") {
-                            bool isMirrored = instance->m_camera.getHFlip();
-                            instance->m_camera.setHFlip(!isMirrored);
+                            bool isMirrored = instance->m_camera->getHFlip();
+                            instance->m_camera->setHFlip(!isMirrored);
                         }
                         else if (cmd == "framesize") {
-                            instance->m_camera.setFrameSize((framesize_t)value);
+                            instance->m_camera->setFrameSize((framesize_t)value);
                         }
                         else if (cmd == "quality") {
-                            instance->m_camera.setJPEGQuality(value);
+                            instance->m_camera->setJPEGQuality(value);
                         }
                         else if (cmd == "reboot") {
                             ESP.restart();
@@ -99,7 +100,7 @@ namespace EspCam
             httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
 
             while (true) {
-                CaptureData pic = instance->m_camera.capture();
+                CaptureData pic = instance->m_camera->capture();
                 if (!pic.success()) {
                     return ESP_FAIL;
                 }
@@ -130,17 +131,18 @@ namespace EspCam
         }
 
     public:
-        WebServer(Camera camera) : m_camera(camera) { }
+        WebServer(Camera* camera, int port = 80) : m_camera(camera), m_port(port) { }
 
-        bool begin() {
-            pixformat_t format = m_camera.getPixelFormat();
+        bool begin(int port = 80) {
+            m_port = port;
+            pixformat_t format = m_camera->getPixelFormat();
             if (format != PIXFORMAT_JPEG) {
                 return false;
             }
 
             httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-            config.server_port = 80;
-            config.ctrl_port = 80;
+            config.server_port = m_port;
+            config.ctrl_port = m_port;
 
             httpd_uri_t indexUri = {
                 .uri       = "/",
@@ -169,8 +171,8 @@ namespace EspCam
                 httpd_register_uri_handler(camera_httpd, &controlUri);
             }
 
-            config.server_port = 81;
-            config.ctrl_port = 81;
+            config.server_port = m_port + 1;
+            config.ctrl_port = m_port + 1;
 
             httpd_uri_t streamUri = {
                 .uri       = "/stream",
