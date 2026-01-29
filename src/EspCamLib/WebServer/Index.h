@@ -1,8 +1,6 @@
 #ifndef WEB_INDEX_H
 #define WEB_INDEX_H
 
-#include <Arduino.h>
-
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="en">
